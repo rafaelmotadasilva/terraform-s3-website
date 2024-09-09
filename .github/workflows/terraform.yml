@@ -27,6 +27,14 @@ jobs:
     - name: Terraform Plan
       run: terraform plan
 
+    - name: Print AWS credentials
+      run: |
+        echo "AWS Access Key: $AWS_ACCESS_KEY_ID"
+        echo "AWS Secret Key: $AWS_SECRET_ACCESS_KEY"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
     - name: Terraform Apply
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
