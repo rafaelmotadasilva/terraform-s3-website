@@ -13,8 +13,16 @@ provider "aws" {
   secret_key = var.secret_key
 }
 
+# resource "aws_s3_bucket" "example" {
+#   bucket = "My Bucket"
+# }
+
+resource "random_id" "bucket_id" {
+  byte_length = 8
+}
+
 resource "aws_s3_bucket" "example" {
-  bucket = "My Bucket"
+  bucket = "my-bucket-${random_id.bucket_id.hex}"
 }
 
 resource "aws_s3_object" "object" {
@@ -57,7 +65,7 @@ resource "aws_s3_bucket_policy" "example" {
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::examplo/*"
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.example.bucket}/*"
     }
   ]
 }
