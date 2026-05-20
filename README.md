@@ -1,125 +1,63 @@
-<h1>
-    <img align="center" width="40px" src="./terraform.svg" alt="Terraform logo">
-    <span>Criando um bucket S3 com Terraform</span>
-</h1>
+# Site Estático no S3 com Terraform
 
-Repositório desenvolvido para fins educativos.
+Provisionamento de um bucket S3 configurado para hospedar site estático via Terraform — infraestrutura como código do início ao deploy.
 
-## Objetivo
-Criar um bucket no S3 com um site estático (utilizando o Webservice ViaCEP) por meio do Terraform.
+## Stack
 
-## Estrutura do projeto
+- **Terraform** — provisionamento da infraestrutura na AWS
+- **Amazon S3** — armazenamento e hospedagem do site estático
+- **HTML** — página estática de exemplo integrando a API ViaCEP
 
-Certifique-se de que o projeto tenha a seguinte estrutura:
+## Estrutura
 
 ```
 .
-├── index.html
-├── main.tf
-└── variables.tf
+├── main.tf          # Recursos AWS: bucket S3, objeto e configuração de website
+├── variables.tf     # Variáveis do projeto (nome do bucket, região)
+└── index.html       # Página estática com consulta à API ViaCEP
 ```
 
-## Exemplo de Código Terraform
+## O que o Terraform provisiona
 
-Aqui está um exemplo de código Terraform que realiza as seguintes tarefas:
+- **Bucket S3** com nome configurável via variável
+- **Objeto S3** (`index.html`) carregado automaticamente
+- **Website hosting** habilitado no bucket com documento de índice definido
+- **Bucket policy** para acesso público de leitura
 
-- Criar um bucket S3: O bucket será utilizado para hospedar o site estático.
+## Pré-requisitos
 
-- Criar um objeto S3: O arquivo index.html será armazenado no bucket.
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) instalado
+- AWS CLI configurado com credenciais válidas (`aws configure`)
+- Permissões IAM para criar e configurar buckets S3
 
-- Configuração do Website no S3: Configurar o bucket para servir conteúdo como um website estático.
+## Como usar
 
-- Política de Acesso ao Bucket: Permitir acesso público ao conteúdo do bucket.
+```bash
+git clone https://github.com/rafaelmotadasilva/terraform-s3-website.git
+cd terraform-s3-website
 
-`main.tf`
-
-```
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "5.64.0"
-    }
-  }
-}
-
-provider "aws" {
-  region     = "us-east-1"
-  access_key = var.access_key
-  secret_key = var.secret_key
-}
-
-resource "aws_s3_bucket" "example" {
-  bucket = "My Bucket"
-}
-
-resource "aws_s3_object" "object" {
-  bucket = aws_s3_bucket.example.bucket
-  key    = "index.html"
-  source = "index.html"
-  content_type = "text/html"
-}
-
-resource "aws_s3_bucket_website_configuration" "example" {
-  bucket = aws_s3_bucket.example.bucket
-
-  index_document {
-    suffix = "index.html"
-  }
-
-  error_document {
-    key = "error.html"
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "example" {
-  bucket = aws_s3_bucket.example.bucket
-
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
-
-resource "aws_s3_bucket_policy" "example" {
-  bucket = aws_s3_bucket.example.bucket
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "Statement1",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::examplo/*"
-    }
-  ]
-}
-POLICY
-}
-```
-
-`variables.tf`
-
-```
-variable "access_key" {
-  description = "my-access-key"
-  type        = string
-}
-
-variable "secret_key" {
-  description = "my-secret-key"
-  type        = string
-}
-```
-
-## Instruções
-
-No diretório onde estão os arquivos `.tf`, execute:
-
-```
 terraform init
+terraform plan
 terraform apply
 ```
+
+Após o apply, o Terraform exibe a URL pública do site.
+
+## Variáveis
+
+| Variável | Descrição | Padrão |
+|---|---|---|
+| `bucket_name` | Nome do bucket S3 | — |
+| `aws_region` | Região AWS | `us-east-1` |
+
+## Destruir a infraestrutura
+
+```bash
+terraform destroy
+```
+
+## Referências
+
+- [Documentação do Terraform — AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [S3 Static Website Hosting](https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html)
+- [API ViaCEP](https://viacep.com.br/)
